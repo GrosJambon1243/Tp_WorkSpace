@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "SlotMachine.generated.h"
-
 UCLASS()
 class ASlotMachine : public AActor
 {
@@ -44,8 +45,16 @@ private:
 	UStaticMeshComponent* LeverComp;
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* LeverCompBase;
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* MatWinning[2];
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* WinnigEffect;
+	
 
 	FTransform initialPos;
+
+	bool isHit = false;
+	float leverAngle = 45;
 
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 

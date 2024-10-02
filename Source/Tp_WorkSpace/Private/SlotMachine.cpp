@@ -32,8 +32,12 @@ ASlotMachine::ASlotMachine()
 	ThirdRollComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ThirdRoll"));
 	ThirdRollComp->SetupAttachment(ReelsRoot);
 
+	LeverCompBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeverBase"));
+	LeverCompBase-> SetupAttachment(LeverRoot);
+	
 	LeverComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Lever"));
-	LeverComp->SetupAttachment(LeverRoot);
+	LeverComp->SetupAttachment(LeverCompBase);
+	
 
 	initialPos.SetRotation(FQuat(FRotator(0.f,0.f,0.f)));
 
@@ -50,13 +54,20 @@ void ASlotMachine::BeginPlay()
 void ASlotMachine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	float leverAngle = LeverComp->GetRelativeTransform().GetRotation().X;
-	//if (LeverComp->GetRelativeTransform().GetRotation().X > 0)
-	//{
-		leverAngle -=  DeltaTime * 30;
-		
-		LeverComp->SetRelativeRotation(FRotator(0.f,0.f,FMath::Max(leverAngle,0)),true);
-	//}
+	
+	if (isHit)
+	{
+	 	leverAngle -=  DeltaTime * 30;
+	 	
+	 	LeverCompBase->SetRelativeRotation(FRotator(0.f,0.f,FMath::Max(leverAngle,0)),true);
+	    if (leverAngle<= 0)
+	    {
+		    isHit = false;
+	    	LeverCompBase->SetRelativeRotation(FRotator(0.f,0.f,0.f),true);
+	    	leverAngle = 45;
+	    	
+	    }
+	}
 	
 
 }
@@ -66,12 +77,24 @@ void ASlotMachine::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimit
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
-	if (LeverComp->GetRelativeTransform().GetRotation().Equals(initialPos.GetRotation()))
+	if (LeverCompBase->GetRelativeTransform().GetRotation().Equals(initialPos.GetRotation()) && isHit == false)
 	{
-		LeverComp->SetRelativeRotation(FRotator(0.f,0.f,45.f),true);
-		RotateReels(FirstRollComp);
-		RotateReels(SecondRollComp);
-		RotateReels(ThirdRollComp);
+		LeverCompBase->SetRelativeRotation(FRotator(0.f,0.f,45.f),true);
+		isHit = true;
+		int resultF = RotateReels(FirstRollComp);
+		int resultS = RotateReels(SecondRollComp);
+		int resultT = RotateReels(ThirdRollComp);
+		
+		if (resultF == resultS || (resultF==resultS && resultF == resultT))
+		{
+			BoxComp2->SetMaterial(0,MatWinning[1]);
+			UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(WinnigEffect,BoxComp,NAME_None,FVector(0.f),FRotator(0.f),EAttachLocation::Type::KeepRelativeOffset,true);
+			NiagaraComponent->Activate();
+		}
+		else
+		{
+			BoxComp2->SetMaterial(0,MatWinning[0]);
+		}
 	}
 
 	
