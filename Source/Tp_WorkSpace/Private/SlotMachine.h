@@ -33,6 +33,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BoxComp;
 	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* BoxComp2;
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* FirstRollComp;
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* SecondRollComp;
@@ -42,5 +44,12 @@ private:
 	UStaticMeshComponent* LeverComp;
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* LeverCompBase;
+
+	FTransform initialPos;
+
+	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
+
+	int RotateReels(UStaticMeshComponent* theReels);
+	
 
 };
